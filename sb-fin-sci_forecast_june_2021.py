@@ -28,45 +28,44 @@ class CustomCoder(Coder):
     def is_deterministic(self):
         return True
 
-def convert_types_discdailydetails(data):
+def convert_types_SciForecastJune2021(data):
     """Converts string values to their appropriate type."""
 
-    date_format = '%m/%d/%Y'
-
-    data["discount_type"] = str(data["discount_type"]) if "discount_type" in data else None
-    data["percent"] = round(float(data['percent'])) if data.get("percent", "") != ""  else None
-    data['total'] = abs(int(data['total'])) if 'total' in data else None
-    data['percent_of_total'] = round(abs(float(data['percent_of_total']))) if 'percent_of_total' in data else None
-    data['count'] = int(data['count']) if 'count' in data else None
-    data['average'] = round(abs(float(data['average'])), 2) if 'average' in data else None
-    date = datetime.datetime.strptime(data['date'], date_format)
-    data['date'] = str(date.date())
-    data['date_year'] = str(date.year)
-    data['date_month'] = str(date.month)
-    data['date_day'] = str(date.day)
-    data['date_dayname'] = str(date.strftime("%A"))
-    data['date_weeks'] = str(date.strftime("%W"))
+    data["site"] = str(data["site"]) if "site" in data else None
+    data["store"] = str(data["store"]) if "store" in data else None
+    data["city"] = str(data["city"]) if "city" in data else None
+    data["type_of_store"] = str(data["type_of_store"]) if "type_of_store" in data else None
+    data["om"] = str(data["om"]) if "om" in data else None
+    data["dm"] = str(data["dm"]) if "dm" in data else None
+    data["total_days"] = int(data["total_days"]) if "total_days" in data else None
+    data["sales"] = round(float(data["sales"])) if data.get("sales") else None
+    data["trx"] = round(float(data["trx"])) if "trx" in data else None
+    data["adt"] = round(float(data["adt"])) if "adt" in data else None
+    data["at"] = round(float(data["at"])) if "at" in data else None
+    data["month"] = str(data["month"]) if "month" in data else None
+    data["year"] = int(data["year"]) if "year" in data else None
 
     return data
 
 schema_tenders_master = (
-    'discount_type:STRING,\
-    percent:INTEGER,\
-    total:INTEGER,\
-    percent_of_total:INTEGER,\
-    count:INTEGER,\
-    average:FLOAT,\
-    date:DATE,\
-    date_year:STRING,\
-    date_month:STRING,\
-    date_day:STRING,\
-    date_dayname:STRING,\
-    date_weeks:STRING'
-    )
+    'site:STRING,\
+    store:STRING,\
+    city:STRING,\
+    type_of_store:STRING,\
+    om:STRING,\
+    dm:STRING,\
+    total_days:INTEGER,\
+    sales:INTEGER,\
+    trx:INTEGER,\
+    adt:INTEGER,\
+    at:INTEGER,\
+    month:STRING,\
+    year:INTEGER'
+)
 
 project_id = 'wired-glider-289003'  # replace with your project ID
 dataset_id = 'starbuck_data_samples'  # replace with your dataset ID
-table_id_tender = 'SB_FIN_DISCDAILYDETAILS'
+table_id_tender = 'SB_FIN_SCIFORECASTJUNE2021'
 
     # parameters
     # project_id='wired-glider-289003'
@@ -98,32 +97,33 @@ def run(argv=None):
 
     p = beam.Pipeline(options=PipelineOptions())
 # with beam.Pipeline(options=PipelineOptions) as p:
-    DiscDailyDetails_data = (p 
-                        | 'ReadData DiscDailyDetails data' >> beam.io.ReadFromText('gs://sb_xlsx_data_source/data_output/DiscDailyDetail.csv', skip_header_lines =1)
-                        # | 'ReadData DiscDailyDetails data' >> beam.io.ReadFromText('data_source_xlxs/data_output_DiscDailyDetail.csv', skip_header_lines =1)
-                        | 'SplitData DiscDailyDetails' >> beam.Map(lambda x: x.split(',')) #delimiter comma (,)
-                        | 'FormatToDict DiscDailyDetails' >> beam.Map(lambda x: {
-                            "discount_type": x[0].strip(),
-                            "percent": x[1].strip(),
-                            "total": x[2].strip(),
-                            "percent_of_total": x[3].strip(),
-                            "count": x[4].strip(),
-                            "average": x[5].strip(),
-                            "date": x[6].strip(),
-                            "date_year": None,
-                            "date_month": None,
-                            "date_day": None,
-                            "date_dayname": None,
-                            "date_weeks": None
+    SciForecastJune2021_data = (p 
+                        | 'ReadData SciForecastJune2021 data' >> beam.io.ReadFromText('gs://sb_xlsx_data_source/data_output/sci_forecast_june_2021.csv', skip_header_lines =1)
+                        # | 'ReadData SciForecastJune2021 data' >> beam.io.ReadFromText('data_source_xlxs/data_output_DiscDailyDetail.csv', skip_header_lines =1)
+                        | 'SplitData SciForecastJune2021' >> beam.Map(lambda x: x.split(',')) #delimiter comma (,)
+                        | 'FormatToDict SciForecastJune2021' >> beam.Map(lambda x: {
+                            "site": x[0].strip(),
+                            "store": x[1].strip(),
+                            "city": x[2].strip(),
+                            "type_of_store": x[3].strip(),
+                            "om": x[4].strip(),
+                            "dm": x[5].strip(),
+                            "total_days": x[6].strip(),
+                            "sales": x[7].strip(),
+                            "trx": x[8].strip(),
+                            "adt": x[9].strip(),
+                            "at": x[10].strip(),
+                            "month": x[11].strip(),
+                            "year": x[12].strip()
                             }) 
-                        # | 'DeleteIncompleteData DiscDailyDetails' >> beam.Filter(discard_incomplete_branchessap)
-                        | 'ChangeDataType DiscDailyDetails' >> beam.Map(convert_types_discdailydetails)
-                        # | 'DeleteUnwantedData DiscDailyDetails' >> beam.Map(del_unwanted_cols_branchessap)
-                        # | 'Write DiscDailyDetails' >> WriteToText('output/data-branchessap','.txt')
+                        # | 'DeleteIncompleteData SciForecastJune2021' >> beam.Filter(discard_incomplete_branchessap)
+                        | 'ChangeDataType SciForecastJune2021' >> beam.Map(convert_types_SciForecastJune2021)
+                        # | 'DeleteUnwantedData SciForecastJune2021' >> beam.Map(del_unwanted_cols_branchessap)
+                        # | 'Write SciForecastJune2021' >> WriteToText('output/data-branchessap','.txt')
                         )
 
     # Write to BQ
-    DiscDailyDetails_data | 'Write to BQ DiscDailyDetails' >> beam.io.WriteToBigQuery(
+    SciForecastJune2021_data | 'Write to BQ SciForecastJune2021' >> beam.io.WriteToBigQuery(
                     table=table_id_tender,
                     dataset=dataset_id,
                     project=project_id,

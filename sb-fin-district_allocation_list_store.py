@@ -1,4 +1,5 @@
 from __future__ import absolute_import
+from io import StringIO
 
 import apache_beam as beam
 import argparse
@@ -11,62 +12,58 @@ from apache_beam.io import ReadFromText
 from apache_beam.coders.coders import Coder
 from sys import argv
 import logging
-import string
+import csv
 # import itertools
 import datetime
+from google.cloud import storage
+from apache_beam.transforms.core import Create, Map
 
 
 # ====================CONVERT TYPE FUNCTIONS=============
 
-class CustomCoder(Coder):
 
-    def encode(self, value):
-        return value.encode("utf-8", "ignore")
+def open_file():
+    # Open local file
+    with open("data_source_xlxs/data_output_District Allocation & list store July 2021.csv") as data:
+        reader = csv.DictReader(data, delimiter=",")
+        return list(reader)
 
-    def decode(self, value):
-        return value.decode("utf-8", "ignore")
 
-    def is_deterministic(self):
-        return True
+def rename_key(data):
+    '''
+    Function to rename the dict key
+    '''
+    data.pop('No.') # remove the "No."" fields
+
+    original_key = [
+        'Site Code', 'Store Name', 'City', 'Type', 'Region No.', 'Region Name', 'District No.', 
+        'District Name', 'Opening Date', 'Address', 'Telephone', 'Email', 'ID SM', 'STORE MANAGER', 
+        'SM HP Number', 'Opertaional Hours Store for Dine in', 
+        'Opertaional Hours Store for take away', 'Community Store', 'DriveThru', 'Reserve', 'Nitro', 
+        'Coffee Forward', 'Delivery Store', 'Ice Cream', 'Fizzio', 'MPOS', 'Masterclass', 'Digital Menu Board', 
+        '2 Mastrena EOC', 'Cashless', 'ESB', 'Shopee Food']
+    
+
+    modified_key = [
+        "site_code", "store_name", "city", "type", "region_no", "region_name", "district_no",
+        "district_name","opening_date", "address","telephone","email","id_sm","store_manager","sm_hp_number",
+        "operational_hours_store_for_dine_in", "operational_hours_store_for_take_away",
+        "community_store","drive_thru","reserve","nitro","coffee_forward","delivery_store",
+        "ice_cream","fizzio","mpos","fizzio","masterclass","digital_menu_board",
+        "two_mastrena_eoc","cashless","esb","shopee_food"
+    ]
+
+    for i in range(len(original_key)):
+        data[modified_key[i]] = data.pop(original_key[i])
+    
+    return data
+
+
 
 def convert_types_DistrictAllocationAndListStore(data):
     """Converts string values to their appropriate type."""
 
     date_format = '%Y-%m-%dT00:00:00+00:00'
-
-
-    # data["site_code"] =  data["site_code"] if "site_code" in data else None
-    # data["store_name"] = data["store_name"] if "store_name" in data else None
-    # data["city"]=  data["city"] if "city" in data else None
-    # data["type"] = data["type"] if "type" in data else None
-    # data["region_no"] = data["region_no"] if "region_no" in data else None
-    # data["region_name"] =  data["region_name"] if "region_name" in data else None
-    # data["district_no"] = data["district_no"] if "district_no" in data else None
-    # data["district_name"] = data["district_name"] if "district_name" in data else None
-    # data["address"] = data["address"] if "address" in data else None
-    # data["telephone"] = data["telephone"] if "telephone" in data else None
-    # data["email"] = x[12]
-    # data["id_sm"] = x[13]
-    # data["store_manager"] = x[14]
-    # data["sm_hp_number"] = x[15]
-    # data["operational_hours_store_for_dine_in"] = x[16]
-    # data["operational_hours_store_for_take_away"] = x[17]
-    # data["community_store"] = x[18]
-    # data["drive_thru"] = x[19]
-    # data["reserve"] = x[20]
-    # data["nitro"] = x[21]
-    # data["coffee_forward"] = x[22]
-    # data["delivery_store"] = x[23]
-    # data["ice_cream"] = x[24]
-    # data["fizzio"] = x[25]
-    # data["mpos"] = x[26]
-    # data["fizzio"] = x[27]
-    # data["masterclass"] = x[28]
-    # data["digital_menu_board"] = x[29]
-    # data["two_mastrena_eoc"] = x[30]
-    # data["cashless"] = x[31]
-    # data["esb"] = x[31]
-    # data["shopee_food"] = x[32]
 
     data['site_code'] = str(data['site_code']) if 'site_code' in data else None
     data['store_name'] = str(data['store_name']) if 'store_name' in data else None
@@ -79,14 +76,9 @@ def convert_types_DistrictAllocationAndListStore(data):
     data['address'] = str(data['address']) if 'address' in data else None
     data['telephone'] = str(data['telephone']) if 'telephone' in data else None
     data['email'] = str(data['email']) if 'email' in data else None
-    
-    data['id_sm'] = data['id_sm'] if "id_sm" in data else None
-    
+    data['id_sm'] = str(data['id_sm']) if "id_sm" in data else None
     data['store_manager'] = str(data['store_manager']) if 'store_manager' in data else None
-    
-    # masih aneh datanya
     data['sm_hp_number'] = str(data['sm_hp_number']) if 'sm_hp_number' in data else None 
-    
     data['operational_hours_store_for_dine_in'] = str(data['operational_hours_store_for_dine_in']) if 'operational_hours_store_for_dine_in' in data else None
     data['operational_hours_store_for_take_away'] = str(data['operational_hours_store_for_take_away']) if 'operational_hours_store_for_take_away' in data else None
     data['community_store'] = str(data['community_store']) if 'community_store' in data else None
@@ -105,29 +97,63 @@ def convert_types_DistrictAllocationAndListStore(data):
     data['esb'] = str(data['esb']) if 'esb' in data else None
     data['shopee_food'] = str(data['shopee_food']) if 'shopee_food' in data else None
 
-    # date = datetime.datetime.strptime(data['opening_date'], date_format)
-    # data['opening_date'] = str(date.date())
-    # data['opening_date_year'] = str(date.year)
-    # data['opening_date_month'] = str(date.month)
-    # data['opening_date_day'] = str(date.day)
-    # data['opening_date_dayname'] = str(date.strftime("%A"))
-    # data['opening_date_weeks'] = str(date.strftime("%W"))
+    if data.get("opening_date") != "":
+        date = datetime.datetime.strptime(data.get("opening_date"), date_format)
+        data['opening_date'] = str(date.date())
+        data['opening_date_year'] = str(date.year)
+        data['opening_date_month'] = str(date.month)
+        data['opening_date_day'] = str(date.day)
+        data['opening_date_dayname'] = str(date.strftime("%A"))
+        data['opening_date_weeks'] = str(date.strftime("%W"))
+    else:
+        data['opening_date'] = None
+        data['opening_date_year'] = ""
+        data['opening_date_month'] = ""
+        data['opening_date_day'] = ""
+        data['opening_date_dayname'] = ""
+        data['opening_date_weeks'] = ""
+
 
     return data
 
 schema_tenders_master = (
-    'discount_type:STRING,\
-    percent:FLOAT,\
-    total:FLOAT,\
-    percent_of_total:FLOAT,\
-    count:INTEGER,\
-    average:FLOAT,\
-    date:DATE,\
-    date_year:STRING,\
-    date_month:STRING,\
-    date_day:STRING,\
-    date_dayname:STRING,\
-    date_weeks:STRING'
+    'site_code:STRING,\
+    store_name:STRING,\
+    city:STRING,\
+    type:STRING,\
+    region_no:STRING,\
+    region_name:STRING,\
+    district_no:STRING,\
+    district_name:STRING,\
+    address:STRING,\
+    telephone:STRING,\
+    email:STRING,\
+    id_sm:STRING,\
+    store_manager:STRING,\
+    sm_hp_number:STRING,\
+    operational_hours_store_for_dine_in:STRING,\
+    operational_hours_store_for_take_away:STRING,\
+    community_store:STRING,\
+    drive_thru:STRING,\
+    reserve:STRING,\
+    nitro:STRING,\
+    coffee_forward:STRING,\
+    delivery_store:STRING,\
+    ice_cream:STRING,\
+    fizzio:STRING,\
+    MPOS:STRING,\
+    masterclass:STRING,\
+    digital_menu_board:STRING,\
+    two_mastrena_eoc:STRING,\
+    cashless:STRING,\
+    esb:STRING,\
+    shopee_food:STRING,\
+    opening_date:DATE,\
+    opening_date_year:STRING,\
+    opening_date_month:STRING,\
+    opening_date_day:STRING,\
+    opening_date_dayname:STRING,\
+    opening_date_weeks:STRING'
     )
 
 project_id = 'wired-glider-289003'  # replace with your project ID
@@ -164,68 +190,27 @@ def run(argv=None):
 
     p = beam.Pipeline(options=PipelineOptions())
 # with beam.Pipeline(options=PipelineOptions) as p:
-    DistrictAllocationAndListStore_data = (p 
-                        # | 'ReadData DistrictAllocationAndListStore data' >> beam.io.ReadFromText('gs://sb_xlsx_data_source/data_output/data_output_District Allocation & list store July 2021.csv', skip_header_lines =1)
-                        | 'ReadData DistrictAllocationAndListStore data' >> beam.io.ReadFromText('data_source_xlxs/data_output_District Allocation & list store July 2021.csv', skip_header_lines =1)
-                        | 'SplitData DistrictAllocationAndListStore' >> beam.Map(lambda x: x.split(',')) #delimiter comma (,)
-                        | 'FormatToDict DistrictAllocationAndListStore' >> beam.Map(lambda x: {
-                            "site_code": x[1].strip(),
-                            "store_name": x[2].strip(),
-                            "city": x[3].strip(),
-                            "type": x[4].strip(),
-                            "region_no": x[5].strip(),
-                            "region_name": x[6].strip(),
-                            "district_no": x[7].strip(),
-                            "district_name": x[8].strip(),
-                            "address": x[10].strip(),
-                            "telephone": x[11].strip(),
-                            "email": x[12].strip(),
-                            "id_sm": x[13].strip(),
-                            "store_manager": x[14].strip(),
-                            "sm_hp_number": x[15].strip(),
-                            "operational_hours_store_for_dine_in": x[16].strip(),
-                            "operational_hours_store_for_take_away": x[17].strip(),
-                            "community_store": x[18].strip(),
-                            "drive_thru": x[19].strip(),
-                            "reserve": x[20].strip(),
-                            "nitro": x[21].strip(),
-                            "coffee_forward": x[22].strip(),
-                            "delivery_store": x[23].strip(),
-                            "ice_cream": x[24].strip(),
-                            "fizzio": x[25].strip(),
-                            "mpos": x[26].strip(),
-                            "fizzio": x[27].strip(),
-                            "masterclass": x[28].strip(),
-                            "digital_menu_board": x[29].strip(),
-                            "two_mastrena_eoc": x[30].strip(),
-                            "cashless": x[31].strip(),
-                            "esb": x[31].strip(),
-                            "shopee_food": x[32].strip(),
 
-                            
-                            "opening_date": x[9].strip(),
-                            "opening_date_year": None,
-                            "opening_date_month": None,
-                            "opening_date_day": None,
-                            "opening_date_dayname": None,
-                            "opening_date_weeks": None
-                            }) 
-                        # | 'DeleteIncompleteData DistrictAllocationAndListStore' >> beam.Filter(discard_incomplete_branchessap)
-                        | 'ChangeDataType DistrictAllocationAndListStore' >> beam.Map(convert_types_DistrictAllocationAndListStore)
-                        # | 'DeleteUnwantedData DistrictAllocationAndListStore' >> beam.Map(del_unwanted_cols_branchessap)
-                        | 'Write DistrictAllocationAndListStore' >> WriteToText('output/data-branchessap','.txt')
-                        )
+
+    # New Script
+    list_of_data = open_file()
+    DistrictAllocationAndListStore_data = (p | 'CreateDictData from DistrictAllocationAndListStore File' >> beam.Create(list_of_data)
+                                    | 'RenameDictKey DistrictAllocationAndListStore' >> beam.Map(rename_key)
+                                    | 'ChangeDataType DistrictAllocationAndListStore' >> beam.Map(convert_types_DistrictAllocationAndListStore)
+                                    # | 'Write DistrictAllocationAndListStore' >> WriteToText('output/data-branchessap', '.txt')
+                                    )
+
 
     # Write to BQ
-    # DistrictAllocationAndListStore_data | 'Write to BQ Tender Daily' >> beam.io.WriteToBigQuery(
-    #                 table=table_id_tender,
-    #                 dataset=dataset_id,
-    #                 project=project_id,
-    #                 schema=schema_tenders_master,
-    #                 write_disposition=beam.io.BigQueryDisposition.WRITE_TRUNCATE,
-    #                 create_disposition=beam.io.BigQueryDisposition.CREATE_IF_NEEDED,
-    #                 # batch_size=int(100)
-    #                 )
+    DistrictAllocationAndListStore_data | 'Write to BQ DistrictAllocationAndListStore' >> beam.io.WriteToBigQuery(
+                    table=table_id_tender,
+                    dataset=dataset_id,
+                    project=project_id,
+                    schema=schema_tenders_master,
+                    write_disposition=beam.io.BigQueryDisposition.WRITE_TRUNCATE,
+                    create_disposition=beam.io.BigQueryDisposition.CREATE_IF_NEEDED,
+                    # batch_size=int(100)
+                    )
 
     result = p.run()
     result.wait_until_finish()

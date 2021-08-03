@@ -31,12 +31,13 @@ class CustomCoder(Coder):
 def convert_types(data):
     """Converts string values to their appropriate type."""
 
-    date_format = '%Y-%m-%dT00:00:00+00:00'
+    date_format = '%Y-%m-%d'
 
     data["location_name"] = str(data["location_name"]) if "location_name" in data else None
     data["location_reference"] = str(data['location_reference']) if 'location_reference' in data else None
     data['order_type_name'] = str(data['order_type_name']) if 'order_type_name' in data else None
     data['sales_net_VAT_after_disc'] = abs(int(data['sales_net_VAT_after_disc'])) if 'sales_net_VAT_after_disc' in data else None
+    data['store_code'] = str(data['store_code']) if 'store_code' in data else None
     
     date = datetime.datetime.strptime(data['date'], date_format)
     data['date'] = str(date.date())
@@ -53,6 +54,7 @@ schema_tenders_master = (
     location_reference:STRING,\
     order_type_name:STRING,\
     sales_net_VAT_after_disc:INTEGER,\
+    store_code:STRING,\
     date:DATE,\
     date_year:STRING,\
     date_month:STRING,\
@@ -104,6 +106,7 @@ def run(argv=None):
                             "location_reference": x[2].strip(),
                             "order_type_name": x[3].strip(),
                             "sales_net_VAT_after_disc": x[4].strip(),
+                            "store_code": x[5].strip(),
                             "date": x[0].strip(),
                             "date_year": None,
                             "date_month": None,

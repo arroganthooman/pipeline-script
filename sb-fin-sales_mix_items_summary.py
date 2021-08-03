@@ -28,17 +28,23 @@ class CustomCoder(Coder):
     def is_deterministic(self):
         return True
 
-def convert_types_discdailydetails(data):
+def convert_types_SalesMixItemsSummary(data):
     """Converts string values to their appropriate type."""
 
-    date_format = '%m/%d/%Y'
+    date_format = "%m/%d/%Y"
 
-    data["discount_type"] = str(data["discount_type"]) if "discount_type" in data else None
-    data["percent"] = round(float(data['percent'])) if data.get("percent", "") != ""  else None
-    data['total'] = abs(int(data['total'])) if 'total' in data else None
-    data['percent_of_total'] = round(abs(float(data['percent_of_total']))) if 'percent_of_total' in data else None
-    data['count'] = int(data['count']) if 'count' in data else None
-    data['average'] = round(abs(float(data['average'])), 2) if 'average' in data else None
+    data["item"] = str(data["item"]) if "item" in data else None
+    data["family_group"] = str(data["family_group"]) if "family_group" in data else None
+    data["major_group"] = str(data["major_group"]) if "major_group" in data else None
+    # print(data.get("gross_sales"))
+    data["gross_sales"] = abs(int(data["gross_sales"])) if data.get("gross_sales").isnumeric() else None
+    data["item_discounts"] = abs(int(data["item_discounts"])) if "item_discounts" in data else None
+    data["sales_less_item_disc"] = int(data["sales_less_item_disc"]) if "sales_less_item_disc" in data else None
+    data["percent_sales"] = round(float(data["percent_sales"]), 2) if "percent_sales" in data else None
+    data["qty_sold"] = int(round(float(data["qty_sold"]))) if "qty_sold" in data else None
+    data["percent_qty_sold"] = round(float(data["percent_qty_sold"]), 2) if "percent_qty_sold" in data else None
+    data["average_price"] = round(float(data["average_price"]), 2) if "average_price" in data else None
+
     date = datetime.datetime.strptime(data['date'], date_format)
     data['date'] = str(date.date())
     data['date_year'] = str(date.year)
@@ -50,23 +56,27 @@ def convert_types_discdailydetails(data):
     return data
 
 schema_tenders_master = (
-    'discount_type:STRING,\
-    percent:INTEGER,\
-    total:INTEGER,\
-    percent_of_total:INTEGER,\
-    count:INTEGER,\
-    average:FLOAT,\
+    'item:STRING,\
+    family_group:STRING,\
+    major_group:STRING,\
+    gross_sales:INTEGER,\
+    item_discounts:INTEGER,\
+    sales_less_item_disc:INTEGER,\
+    percent_sales:FLOAT,\
+    qty_sold:INTEGER,\
+    percent_qty_sold:FLOAT,\
+    average_price:FLOAT,\
     date:DATE,\
     date_year:STRING,\
     date_month:STRING,\
     date_day:STRING,\
     date_dayname:STRING,\
     date_weeks:STRING'
-    )
+)
 
 project_id = 'wired-glider-289003'  # replace with your project ID
 dataset_id = 'starbuck_data_samples'  # replace with your dataset ID
-table_id_tender = 'SB_FIN_DISCDAILYDETAILS'
+table_id_tender = 'SB_FIN_SalesMixItemsSummary'
 
     # parameters
     # project_id='wired-glider-289003'
@@ -98,40 +108,39 @@ def run(argv=None):
 
     p = beam.Pipeline(options=PipelineOptions())
 # with beam.Pipeline(options=PipelineOptions) as p:
-    DiscDailyDetails_data = (p 
-                        | 'ReadData DiscDailyDetails data' >> beam.io.ReadFromText('gs://sb_xlsx_data_source/data_output/DiscDailyDetail.csv', skip_header_lines =1)
-                        # | 'ReadData DiscDailyDetails data' >> beam.io.ReadFromText('data_source_xlxs/data_output_DiscDailyDetail.csv', skip_header_lines =1)
-                        | 'SplitData DiscDailyDetails' >> beam.Map(lambda x: x.split(',')) #delimiter comma (,)
-                        | 'FormatToDict DiscDailyDetails' >> beam.Map(lambda x: {
-                            "discount_type": x[0].strip(),
-                            "percent": x[1].strip(),
-                            "total": x[2].strip(),
-                            "percent_of_total": x[3].strip(),
-                            "count": x[4].strip(),
-                            "average": x[5].strip(),
-                            "date": x[6].strip(),
-                            "date_year": None,
-                            "date_month": None,
-                            "date_day": None,
-                            "date_dayname": None,
-                            "date_weeks": None
+    SalesMixItemsSummary_data = (p 
+                        | 'ReadData SalesMixItemsSummary data' >> beam.io.ReadFromText('gs://sb_xlsx_data_source/data_output/SalesMixItemsSummary.csv', skip_header_lines =1)
+                        # | 'ReadData SalesMixItemsSummary data' >> beam.io.ReadFromText('data_source_xlxs/data_output_SalesMixItemsSummary.csv', skip_header_lines =1)
+                        | 'SplitData SalesMixItemsSummary' >> beam.Map(lambda x: x.split(',')) #delimiter comma (,)
+                        | 'FormatToDict SalesMixItemsSummary' >> beam.Map(lambda x: {
+                            "item": x[0].strip(),
+                            "family_group": x[1].strip(),
+                            "major_group": x[2].strip(),
+                            "gross_sales": x[3].strip(),
+                            "item_discounts": x[4].strip(),
+                            "sales_less_item_disc": x[5].strip(),
+                            "percent_sales": x[6].strip(),
+                            "qty_sold": x[7].strip(),
+                            "percent_qty_sold": x[8].strip(),
+                            "average_price": x[9].strip(),
+                            "date": x[10].strip(),
                             }) 
-                        # | 'DeleteIncompleteData DiscDailyDetails' >> beam.Filter(discard_incomplete_branchessap)
-                        | 'ChangeDataType DiscDailyDetails' >> beam.Map(convert_types_discdailydetails)
-                        # | 'DeleteUnwantedData DiscDailyDetails' >> beam.Map(del_unwanted_cols_branchessap)
-                        # | 'Write DiscDailyDetails' >> WriteToText('output/data-branchessap','.txt')
+                        # | 'DeleteIncompleteData SalesMixItemsSummary' >> beam.Filter(discard_incomplete_branchessap)
+                        | 'ChangeDataType SalesMixItemsSummary' >> beam.Map(convert_types_SalesMixItemsSummary)
+                        # | 'DeleteUnwantedData SalesMixItemsSummary' >> beam.Map(del_unwanted_cols_branchessap)
+                        | 'Write SalesMixItemsSummary' >> WriteToText('output/data-branchessap','.txt')
                         )
 
     # Write to BQ
-    DiscDailyDetails_data | 'Write to BQ DiscDailyDetails' >> beam.io.WriteToBigQuery(
-                    table=table_id_tender,
-                    dataset=dataset_id,
-                    project=project_id,
-                    schema=schema_tenders_master,
-                    write_disposition=beam.io.BigQueryDisposition.WRITE_TRUNCATE,
-                    create_disposition=beam.io.BigQueryDisposition.CREATE_IF_NEEDED,
-                    # batch_size=int(100)
-                    )
+    # SalesMixItemsSummary_data | 'Write to BQ SalesMixItemsSummary' >> beam.io.WriteToBigQuery(
+    #                 table=table_id_tender,
+    #                 dataset=dataset_id,
+    #                 project=project_id,
+    #                 schema=schema_tenders_master,
+    #                 write_disposition=beam.io.BigQueryDisposition.WRITE_TRUNCATE,
+    #                 create_disposition=beam.io.BigQueryDisposition.CREATE_IF_NEEDED,
+    #                 # batch_size=int(100)
+    #                 )
 
     result = p.run()
     result.wait_until_finish()

@@ -28,17 +28,25 @@ class CustomCoder(Coder):
     def is_deterministic(self):
         return True
 
-def convert_types_discdailydetails(data):
+def convert_types_CompareKPIsByDate(data):
     """Converts string values to their appropriate type."""
 
-    date_format = '%m/%d/%Y'
+    date_format = '%d-%m-%Y'
 
-    data["discount_type"] = str(data["discount_type"]) if "discount_type" in data else None
-    data["percent"] = round(float(data['percent'])) if data.get("percent", "") != ""  else None
-    data['total'] = abs(int(data['total'])) if 'total' in data else None
-    data['percent_of_total'] = round(abs(float(data['percent_of_total']))) if 'percent_of_total' in data else None
-    data['count'] = int(data['count']) if 'count' in data else None
-    data['average'] = round(abs(float(data['average'])), 2) if 'average' in data else None
+    data["store_code"] = str(data["store_code"]) if "store_code" in data else None
+    data["location"] = str(data['location']) if data.get("location", "") != ""  else None
+    data['date'] = str(data['date']) if 'date' in data else None
+    data['net_sales'] = round(abs(float(data['net_sales']))) if 'net_sales' in data else None
+    data['prep_cost'] = int(data['prep_cost']) if 'prep_cost' in data else None
+    data['labor_cost'] = int(data['labor_cost']) if 'labor_cost' in data else None
+    data['margin'] = int(data['margin']) if 'margin' in data else None
+    data['fc_percent'] = int(data['fc_percent']) if 'fc_percent' in data else None
+    data['lc_percent'] = int(data['lc_percent']) if 'lc_percent' in data else None
+    data['checks'] = int(data['checks']) if 'checks' in data else None
+    data['per_check'] = round(abs(float(data['per_check'])), 2) if 'per_check' in data else None
+    data['voids'] = abs(int(data['voids'])) if 'voids' in data else None
+
+
     date = datetime.datetime.strptime(data['date'], date_format)
     data['date'] = str(date.date())
     data['date_year'] = str(date.year)
@@ -50,12 +58,17 @@ def convert_types_discdailydetails(data):
     return data
 
 schema_tenders_master = (
-    'discount_type:STRING,\
-    percent:INTEGER,\
-    total:INTEGER,\
-    percent_of_total:INTEGER,\
-    count:INTEGER,\
-    average:FLOAT,\
+    'store_code:STRING,\
+    location:STRING,\
+    net_sales:INTEGER,\
+    prep_cost:INTEGER,\
+    labor_cost:FLOAT,\
+    margin:INTEGER,\
+    fc_percent:INTEGER,\
+    lc_percent:INTEGER,\
+    checks:INTEGER,\
+    per_check:FLOAT,\
+    voids:INTEGER,\
     date:DATE,\
     date_year:STRING,\
     date_month:STRING,\
@@ -66,7 +79,7 @@ schema_tenders_master = (
 
 project_id = 'wired-glider-289003'  # replace with your project ID
 dataset_id = 'starbuck_data_samples'  # replace with your dataset ID
-table_id_tender = 'SB_FIN_DISCDAILYDETAILS'
+table_id_tender = 'SB_FIN_CompareKPIsByDate'
 
     # parameters
     # project_id='wired-glider-289003'
@@ -98,32 +111,37 @@ def run(argv=None):
 
     p = beam.Pipeline(options=PipelineOptions())
 # with beam.Pipeline(options=PipelineOptions) as p:
-    DiscDailyDetails_data = (p 
-                        | 'ReadData DiscDailyDetails data' >> beam.io.ReadFromText('gs://sb_xlsx_data_source/data_output/DiscDailyDetail.csv', skip_header_lines =1)
-                        # | 'ReadData DiscDailyDetails data' >> beam.io.ReadFromText('data_source_xlxs/data_output_DiscDailyDetail.csv', skip_header_lines =1)
-                        | 'SplitData DiscDailyDetails' >> beam.Map(lambda x: x.split(',')) #delimiter comma (,)
-                        | 'FormatToDict DiscDailyDetails' >> beam.Map(lambda x: {
-                            "discount_type": x[0].strip(),
-                            "percent": x[1].strip(),
-                            "total": x[2].strip(),
-                            "percent_of_total": x[3].strip(),
-                            "count": x[4].strip(),
-                            "average": x[5].strip(),
-                            "date": x[6].strip(),
+    CompareKPIsByDate_data = (p 
+                        | 'ReadData CompareKPIsByDate data' >> beam.io.ReadFromText('gs://sb_xlsx_data_source/data_output/CompareKPIsByDate.csv', skip_header_lines =1)
+                        # | 'ReadData CompareKPIsByDate data' >> beam.io.ReadFromText('data_source_xlxs/data_output_CompareKPIsByDate.csv', skip_header_lines =1)
+                        | 'SplitData CompareKPIsByDate' >> beam.Map(lambda x: x.split(',')) #delimiter comma (,)
+                        | 'FormatToDict CompareKPIsByDate' >> beam.Map(lambda x: {
+                            "store_code": x[0].strip(),
+                            "location": x[1].strip(),
+                            "date": x[2].strip(),
                             "date_year": None,
                             "date_month": None,
                             "date_day": None,
                             "date_dayname": None,
-                            "date_weeks": None
+                            "date_weeks": None,
+                            "net_sales": x[3].strip(),
+                            "prep_cost": x[4].strip(),
+                            "labor_cost": x[5].strip(),
+                            "margin": x[6].strip(),
+                            "fc_percent": x[7].strip(),
+                            "lc_percent": x[8].strip(),
+                            "checks": x[9].strip(),
+                            "per_check": x[10].strip(),
+                            "voids": x[11].strip()
                             }) 
-                        # | 'DeleteIncompleteData DiscDailyDetails' >> beam.Filter(discard_incomplete_branchessap)
-                        | 'ChangeDataType DiscDailyDetails' >> beam.Map(convert_types_discdailydetails)
-                        # | 'DeleteUnwantedData DiscDailyDetails' >> beam.Map(del_unwanted_cols_branchessap)
-                        # | 'Write DiscDailyDetails' >> WriteToText('output/data-branchessap','.txt')
+                        # | 'DeleteIncompleteData CompareKPIsByDate' >> beam.Filter(discard_incomplete_branchessap)
+                        | 'ChangeDataType CompareKPIsByDate' >> beam.Map(convert_types_CompareKPIsByDate)
+                        # | 'DeleteUnwantedData CompareKPIsByDate' >> beam.Map(del_unwanted_cols_branchessap)
+                        # | 'Write CompareKPIsByDate' >> WriteToText('output/data-branchessap','.txt')
                         )
 
     # Write to BQ
-    DiscDailyDetails_data | 'Write to BQ DiscDailyDetails' >> beam.io.WriteToBigQuery(
+    CompareKPIsByDate_data | 'Write to BQ CompareKPIsByDate' >> beam.io.WriteToBigQuery(
                     table=table_id_tender,
                     dataset=dataset_id,
                     project=project_id,
