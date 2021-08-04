@@ -4,3 +4,6 @@ wired-glider-289003-9bd74e62ec18.json
 data_source_xlxs/
 output/
 result.txt
+txt_source/
+apache_beam*
+__pycache__

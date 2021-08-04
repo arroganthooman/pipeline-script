@@ -14,9 +14,9 @@ from sys import argv
 import logging
 import csv
 # import itertools
-import datetime
 from google.cloud import storage
 from apache_beam.transforms.core import Create, Map
+import dateutil
 
 
 # ====================CONVERT TYPE FUNCTIONS=============
@@ -49,12 +49,15 @@ def rename_key(data):
         "district_name","opening_date", "address","telephone","email","id_sm","store_manager","sm_hp_number",
         "operational_hours_store_for_dine_in", "operational_hours_store_for_take_away",
         "community_store","drive_thru","reserve","nitro","coffee_forward","delivery_store",
-        "ice_cream","fizzio","mpos","fizzio","masterclass","digital_menu_board",
+        "ice_cream","fizzio","mpos","masterclass","digital_menu_board",
         "two_mastrena_eoc","cashless","esb","shopee_food"
     ]
 
     for i in range(len(original_key)):
-        data[modified_key[i]] = data.pop(original_key[i])
+        if modified_key[i] == "opening_date":
+            data[modified_key[i]] = data.pop(original_key[i])[0:10]
+        else:
+            data[modified_key[i]] = data.pop(original_key[i])
     
     return data
 
@@ -62,8 +65,9 @@ def rename_key(data):
 
 def convert_types_DistrictAllocationAndListStore(data):
     """Converts string values to their appropriate type."""
+    import datetime
 
-    date_format = '%Y-%m-%dT00:00:00+00:00'
+    date_format = '%Y-%m-%d'
 
     data['site_code'] = str(data['site_code']) if 'site_code' in data else None
     data['store_name'] = str(data['store_name']) if 'store_name' in data else None
@@ -105,6 +109,7 @@ def convert_types_DistrictAllocationAndListStore(data):
         data['opening_date_day'] = str(date.day)
         data['opening_date_dayname'] = str(date.strftime("%A"))
         data['opening_date_weeks'] = str(date.strftime("%W"))
+
     else:
         data['opening_date'] = None
         data['opening_date_year'] = ""
@@ -158,7 +163,7 @@ schema_tenders_master = (
 
 project_id = 'wired-glider-289003'  # replace with your project ID
 dataset_id = 'starbuck_data_samples'  # replace with your dataset ID
-table_id_tender = 'SB_FIN_DistrictAllocationAndListStore'
+table_id_tender = 'SB_FIN_DistrictAllocationListStore_2021_7'
 
     # parameters
     # project_id='wired-glider-289003'
@@ -194,7 +199,8 @@ def run(argv=None):
 
     # New Script
     list_of_data = open_file()
-    DistrictAllocationAndListStore_data = (p | 'CreateDictData from DistrictAllocationAndListStore File' >> beam.Create(list_of_data)
+    DistrictAllocationAndListStore_data = (p 
+                                    | 'CreateDictData from DistrictAllocationAndListStore File' >> beam.Create(list_of_data)
                                     | 'RenameDictKey DistrictAllocationAndListStore' >> beam.Map(rename_key)
                                     | 'ChangeDataType DistrictAllocationAndListStore' >> beam.Map(convert_types_DistrictAllocationAndListStore)
                                     # | 'Write DistrictAllocationAndListStore' >> WriteToText('output/data-branchessap', '.txt')

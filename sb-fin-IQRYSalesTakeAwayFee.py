@@ -31,18 +31,19 @@ class CustomCoder(Coder):
 def convert_types_IQRYSalesTakeAwayFee(data):
     """Converts string values to their appropriate type."""
 
-    date_format = '%Y-%m-%dT00:00:00+00:00'
+    date_format = '%Y-%m-%d'
 
 
     data['discount_total'] = abs(int(data['discount_total'])) if 'discount_total' in data else None
     data['family_group_name'] = str(data['family_group_name']) if 'family_group_name' in data else None
     data['gross_sales_after_disc'] = abs(int(data['gross_sales_after_disc'])) if 'gross_sales_after_disc' in data else None
     data['location_name'] = str(data['location_name']) if 'location_name' in data else None
-    data['location_reference'] = str(data['location_reference']) if 'location_reference' in data else None
+    data['location_reference'] = int(data['location_reference']) if 'location_reference' in data else None
     data['menu_item_name'] = str(data['menu_item_name']) if 'menu_item_name' in data else None
     data['order_type_name'] = str(data['order_type_name']) if 'order_type_name' in data else None
     data['sales_count'] = abs(int(data['sales_count'])) if 'sales_count' in data else None
     data['sales_total'] = abs(int(data['sales_total'])) if 'sales_total' in data else None
+    data['store_code'] = str(data['store_code']) if 'store_code' in data else None
     
     date = datetime.datetime.strptime(data['date'], date_format)
     data['date'] = str(date.date())
@@ -59,11 +60,12 @@ schema_tenders_master = (
     family_group_name:STRING,\
     gross_sales_after_disc:INTEGER,\
     location_name:STRING,\
-    location_reference:STRING,\
+    location_reference:INTEGER,\
     menu_item_name:STRING,\
     order_type_name:STRING,\
     sales_count:INTEGER,\
     sales_total:INTEGER,\
+    store_code:STRING,\
     date:DATE,\
     date_year:STRING,\
     date_month:STRING,\
@@ -120,6 +122,7 @@ def run(argv=None):
                             "order_type_name": x[7].strip(),
                             "sales_count": x[8].strip(),
                             "sales_total": x[9].strip(),
+                            "store_code": x[10].strip(),
                             "date": x[0].strip(),
                             "date_year": None,
                             "date_month": None,

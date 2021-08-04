@@ -123,7 +123,7 @@ def run(argv=None):
     p = beam.Pipeline(options=PipelineOptions())
 # with beam.Pipeline(options=PipelineOptions) as p:
     sciBudget2021_data = (p 
-                        # | 'ReadData sciBudget2021 data' >> beam.io.ReadFromText('gs://sb_xlsx_data_source/data_output/sci_budget_2021.csv', skip_header_lines =1)
+                        | 'ReadData sciBudget2021 data' >> beam.io.ReadFromText('gs://sb_xlsx_data_source/data_output/sci_budget_2021.csv', skip_header_lines =1)
                         # | 'ReadData sciBudget2021 data' >> beam.io.ReadFromText('data_source_xlxs/data_output_sci_budget_2021.csv', skip_header_lines =1)
                         | 'SplitData sciBudget2021' >> beam.Map(lambda x: x.split(',')) #delimiter comma (,)
                         | 'FormatToDict sciBudget2021' >> beam.Map(lambda x: {

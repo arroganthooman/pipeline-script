@@ -36,7 +36,6 @@ def convert_types_SalesMixItemsSummary(data):
     data["item"] = str(data["item"]) if "item" in data else None
     data["family_group"] = str(data["family_group"]) if "family_group" in data else None
     data["major_group"] = str(data["major_group"]) if "major_group" in data else None
-    # print(data.get("gross_sales"))
     data["gross_sales"] = abs(int(data["gross_sales"])) if data.get("gross_sales").isnumeric() else None
     data["item_discounts"] = abs(int(data["item_discounts"])) if "item_discounts" in data else None
     data["sales_less_item_disc"] = int(data["sales_less_item_disc"]) if "sales_less_item_disc" in data else None
@@ -128,19 +127,19 @@ def run(argv=None):
                         # | 'DeleteIncompleteData SalesMixItemsSummary' >> beam.Filter(discard_incomplete_branchessap)
                         | 'ChangeDataType SalesMixItemsSummary' >> beam.Map(convert_types_SalesMixItemsSummary)
                         # | 'DeleteUnwantedData SalesMixItemsSummary' >> beam.Map(del_unwanted_cols_branchessap)
-                        | 'Write SalesMixItemsSummary' >> WriteToText('output/data-branchessap','.txt')
+                        # | 'Write SalesMixItemsSummary' >> WriteToText('output/data-branchessap','.txt')
                         )
 
     # Write to BQ
-    # SalesMixItemsSummary_data | 'Write to BQ SalesMixItemsSummary' >> beam.io.WriteToBigQuery(
-    #                 table=table_id_tender,
-    #                 dataset=dataset_id,
-    #                 project=project_id,
-    #                 schema=schema_tenders_master,
-    #                 write_disposition=beam.io.BigQueryDisposition.WRITE_TRUNCATE,
-    #                 create_disposition=beam.io.BigQueryDisposition.CREATE_IF_NEEDED,
-    #                 # batch_size=int(100)
-    #                 )
+    SalesMixItemsSummary_data | 'Write to BQ SalesMixItemsSummary' >> beam.io.WriteToBigQuery(
+                    table=table_id_tender,
+                    dataset=dataset_id,
+                    project=project_id,
+                    schema=schema_tenders_master,
+                    write_disposition=beam.io.BigQueryDisposition.WRITE_TRUNCATE,
+                    create_disposition=beam.io.BigQueryDisposition.CREATE_IF_NEEDED,
+                    # batch_size=int(100)
+                    )
 
     result = p.run()
     result.wait_until_finish()
