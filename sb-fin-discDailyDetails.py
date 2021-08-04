@@ -68,26 +68,29 @@ project_id = 'wired-glider-289003'  # replace with your project ID
 dataset_id = 'starbuck_data_samples'  # replace with your dataset ID
 table_id_tender = 'SB_DISC_DAILY'
 
-    # parameters
-    # project_id='wired-glider-289003'
-    # job_name='lingga-test-sb'
-    # temp_location='gs://$PROJECT/temp'
-    # max_num_workers=3
-    # worker_region='asia-southeast1'
+# parameters
+job_name = "fikri-disc-daily-details" #replace with your job name
+temp_location=f'gs://{project_id}/temp'
+staging_location = f'gs://{project_id}/starbucks-BOH/staging' # replace with  your folder destination
+max_num_workers=3 # replace with preferred num_workers
+worker_region='asia-southeast1' #replace with your worker region
 
 def run(argv=None):
 
-    parser = argparse.ArgumentParser()
-    known_args = parser.parse_known_args(argv)
-    # options=PipelineOptions(
-        # runner='DataflowRunner',
-    #     project=project_id,
-    #     job_name=job_name,
-    #     temp_location=temp_location,
-    #     region=worker_region,
-        # autoscaling_algorithm='THROUGHPUT_BASED',
-        # max_num_workers=max_num_workers
-    # )
+    # parser = argparse.ArgumentParser()
+    # known_args = parser.parse_known_args(argv)
+    # print(known_args)
+
+    options = PipelineOptions(
+        runner='DataflowRunner',
+        project=project_id,
+        job_name=job_name,
+        temp_location=temp_location,
+        region=worker_region,
+        autoscaling_algorithm='THROUGHPUT_BASED',
+        max_num_workers=max_num_workers,
+        save_main_session = True
+    )
 
     # p = beam.Pipeline(options)
     # p = beam.Pipeline(options=PipelineOptions())
@@ -96,8 +99,8 @@ def run(argv=None):
     # pipeline_options = PipelineOptions(runner)
     # pipeline_options.view_as(SetupOptions).save_main_session = True
 
-    p = beam.Pipeline(options=PipelineOptions())
-# with beam.Pipeline(options=PipelineOptions) as p:
+    # p = beam.Pipeline(options=PipelineOptions())
+    p = beam.Pipeline(options=options)
     DiscDailyDetails_data = (p 
                         | 'ReadData DiscDailyDetails data' >> beam.io.ReadFromText('gs://sb_xlsx_data_source/data_output/DiscDailyDetail.csv', skip_header_lines =1)
                         # | 'ReadData DiscDailyDetails data' >> beam.io.ReadFromText('data_source_xlxs/data_output_DiscDailyDetail.csv', skip_header_lines =1)
