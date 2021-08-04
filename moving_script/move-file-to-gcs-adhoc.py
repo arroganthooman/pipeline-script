@@ -14,7 +14,7 @@ def upload_to_bucket(file_name, path_to_file, bucket_name):
 
 if __name__ == "__main__":
     # Get the list of all file in source_file_xlxs folder
-    pathname = "/media/arroganthooman/DATA/Fikri/UI/Magang/Script/moving_script/source_file_xlxs" # replace with your folder pathname
+    pathname = "/media/arroganthooman/DATA/Fikri/UI/Magang/Script/moving_script/source_file_xlsx" # replace with your folder pathname
     list_file = os.listdir(pathname)
 
     bucket_name = "sb-fikri-test-move" # rename with your bucket
