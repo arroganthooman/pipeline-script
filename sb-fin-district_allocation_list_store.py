@@ -112,11 +112,11 @@ def convert_types_DistrictAllocationAndListStore(data):
 
     else:
         data['opening_date'] = None
-        data['opening_date_year'] = ""
-        data['opening_date_month'] = ""
-        data['opening_date_day'] = ""
-        data['opening_date_dayname'] = ""
-        data['opening_date_weeks'] = ""
+        data['opening_date_year'] = None
+        data['opening_date_month'] = None
+        data['opening_date_day'] = None
+        data['opening_date_dayname'] = None
+        data['opening_date_weeks'] = None
 
 
     return data

@@ -265,14 +265,24 @@ class UnnestAllJoin(beam.DoFn):
 def rmduplicate(data):
 
     #  return list(unique_everseen(data))
-    seen = set()
-    new_l = []
+    # seen = set()
+    # new_l = []
+    # for d in data:
+    #     t = tuple(sorted(d.items()))
+    #     if t not in seen:
+    #         seen.add(t)
+    #         new_l.append(d)
+    # return new_l
+
+    dictstr_set = set()
     for d in data:
-        t = tuple(sorted(d.items()))
-        if t not in seen:
-            seen.add(t)
-            new_l.append(d)
-    return new_l
+        dictstr_set.add(str(d))
+    
+    dict_list = []
+    for d in dictstr_set:
+        dict_list.append(eval(d))
+    
+    return dict_list
 
 class BreakList(beam.DoFn):
     def process(self, data):
@@ -970,12 +980,12 @@ def run(argv=None):
                         # | 'ReadData branchessap type' >> beam.io.ReadFromText('data_source_BOH/data_source_20210501_BranchesSap_20210607_093034.txt', skip_header_lines =1)
                         # | 'ReadData branchessap type' >> beam.io.ReadFromText('BOH_Data_20210501_03/3d_data_source_BranchesSap_20210710_065124.txt', skip_header_lines =1)
                         # | 'ReadData branchessap type' >> beam.io.ReadFromText('BOH_Data_20210501_09/9d_data_source_BranchesSap_20210721_190925.txt', skip_header_lines =1)
-                        # | 'ReadData Branches_sap' >> beam.io.ReadFromText('gs://sb-data-source/data_source_20210501/BranchesSap_20210607_093034.txt', skip_header_lines =1)
+                        | 'ReadData Branches_sap' >> beam.io.ReadFromText('gs://sb-data-source/data_source_20210501/BranchesSap_20210607_093034.txt', skip_header_lines =1)
                         # | 'ReadData Branches_sap' >> beam.io.ReadFromText('gs://sb-data-source/3d_data_source_20210501/3d_data_source_BranchesSap_20210710_065124.txt', skip_header_lines =1)
                         # | 'ReadData Branches_sap' >> beam.io.ReadFromText('gs://sb-data-source/9d_data_source_20210501/9d_data_source_BranchesSap_20210721_190925.txt', skip_header_lines =1)
                         # | 'ReadData Branches_sap' >> beam.io.ReadFromText('gs://sb-data-source/1m_datasource_20210501/BranchesSap_20210728_140524.txt', skip_header_lines =1, coder=CustomCoder())
                         # | 'ReadData Branches_sap' >> beam.io.ReadFromText('gs://sb-data-source/1m_datasource-20210501-01-10days/01-10days-BranchesSap_20210801_211616.txt', skip_header_lines =1, coder=CustomCoder())
-                        | 'ReadData Branches_sap' >> beam.io.ReadFromText('gs://sb-data-source/1m_datasource-20210501-11-20days/11-20days-BranchesSap_20210801_213849.txt', skip_header_lines =1, coder=CustomCoder())
+                        # | 'ReadData Branches_sap' >> beam.io.ReadFromText('gs://sb-data-source/1m_datasource-20210501-11-20days/11-20days-BranchesSap_20210801_213849.txt', skip_header_lines =1, coder=CustomCoder())
                         # | 'ReadData Branches_sap' >> beam.io.ReadFromText('gs://sb-data-source/1m_datasource-20210501-21-31days/21-31days-BranchesSap_20210801_220059.txt', skip_header_lines =1, coder=CustomCoder())
                         # | 'ReadData Branches_sap' >> beam.io.ReadFromText('gs://stbck_sales_data/3D_data_source_20210501/3d_data_source_BranchesSap_20210710_065124.txt', skip_header_lines =1)
                         | 'SplitData Branches_sap' >> beam.Map(lambda x: x.split('|')) #hapus spasi pakai python strip
@@ -995,7 +1005,7 @@ def run(argv=None):
     #                     # | 'ReadData payment type' >> beam.io.ReadFromText('data_source_BOH/data_source_20210501_Payment_Types_20210607_093448.txt', skip_header_lines =1) 
     #                     # | 'ReadData payment type' >> beam.io.ReadFromText('BOH_Data_20210501_03/3d_data_source_Payment_Types_20210710_065029.txt', skip_header_lines =1)
     #                     # | 'ReadData payment type' >> beam.io.ReadFromText('BOH_Data_20210501_09/9d_data_source_Payment_Types_20210721_190833.txt', skip_header_lines =1)
-    #                     # | 'ReadData payment type' >> beam.io.ReadFromText('gs://sb-data-source/data_source_20210501/Payment_Types_20210607_093448.txt', skip_header_lines =1)
+                        # | 'ReadData payment type' >> beam.io.ReadFromText('gs://sb-data-source/data_source_20210501/Payment_Types_20210607_093448.txt', skip_header_lines =1)
     #                     # | 'ReadData payment type' >> beam.io.ReadFromText('gs://sb-data-source/3d_data_source_20210501/3d_data_source_Payment_Types_20210710_065029.txt', skip_header_lines =1)
     #                     # | 'ReadData payment type' >> beam.io.ReadFromText('gs://sb-data-source/9d_data_source_20210501/9d_data_source_Payment_Types_20210721_190833.txt', skip_header_lines =1)
     #                     # | 'ReadData payment type' >> beam.io.ReadFromText('gs://sb-data-source/1m_datasource_20210501/Payment_Types_20210728_140501.txt', skip_header_lines =1)
@@ -1019,12 +1029,12 @@ def run(argv=None):
                         # | 'ReadData transtype micros' >> beam.io.ReadFromText('data_source_BOH/data_source_20210501_Transaction_Type_Micros_20210611_124914.txt', skip_header_lines =1)
                         # | 'ReadData transtype micros' >> beam.io.ReadFromText('BOH_Data_20210501_03/3d_data_source_Transaction_Type_Micros_20210716_134914.txt', skip_header_lines =1)
                         # | 'ReadData transtype micros' >> beam.io.ReadFromText('BOH_Data_20210501_09/9d_data_source_Transaction_Type_Micros_20210721_193526.txt', skip_header_lines =1)
-                        # | 'ReadData transtype micros' >> beam.io.ReadFromText('gs://sb-data-source/data_source_20210501/data_source_20210501_Transaction_Type_Micros_20210611_124914.txt', skip_header_lines =1)
+                        | 'ReadData transtype micros' >> beam.io.ReadFromText('gs://sb-data-source/data_source_20210501/data_source_20210501_Transaction_Type_Micros_20210611_124914.txt', skip_header_lines =1)
                         # | 'ReadData transtype micros' >> beam.io.ReadFromText('gs://sb-data-source/3d_data_source_20210501/3d_data_source_Transaction_Type_Micros_20210716_134914.txt', skip_header_lines =1)
                         # | 'ReadData transtype micros' >> beam.io.ReadFromText('gs://sb-data-source/9d_data_source_20210501/9d_data_source_Transaction_Type_Micros_20210721_193526.txt', skip_header_lines =1)
                         # | 'ReadData transtype micros' >> beam.io.ReadFromText('gs://sb-data-source/1m_datasource_20210501/Transaction_Type_Micros_20210730_090844.txt', skip_header_lines =1, coder=CustomCoder())
                         # | 'ReadData transtype micros' >> beam.io.ReadFromText('gs://sb-data-source/1m_datasource-20210501-01-10days/01-10days-Transaction_Type_Micros_202108021.txt', skip_header_lines =1, coder=CustomCoder())
-                        | 'ReadData transtype micros' >> beam.io.ReadFromText('gs://sb-data-source/1m_datasource-20210501-11-20days/11-20days-Transaction_Type_Micros_202108023.txt', skip_header_lines =1, coder=CustomCoder())
+                        # | 'ReadData transtype micros' >> beam.io.ReadFromText('gs://sb-data-source/1m_datasource-20210501-11-20days/11-20days-Transaction_Type_Micros_202108023.txt', skip_header_lines =1, coder=CustomCoder())
                         # | 'ReadData transtype micros' >> beam.io.ReadFromText('gs://sb-data-source/1m_datasource-20210501-21-31days/21-31days-Transaction_Type_Micros_202108022.txt', skip_header_lines =1, coder=CustomCoder())
                         # | 'ReadData transtype micros' >> beam.io.ReadFromText('gs://stbck_sales_data/3D_data_source_20210501/3d_data_source_Transaction_Type_Micros_20210716_134914.txt', skip_header_lines =1)
                         | 'SplitData transtype micros' >> beam.Map(lambda x: x.split('|'))
@@ -1045,12 +1055,12 @@ def run(argv=None):
                         # | 'ReadData transtype time' >> beam.io.ReadFromText('data_source_BOH/data_source_20210501_Transaction_Type_Time_20210607_102017.txt', skip_header_lines =1)
                         # | 'ReadData transtype time' >> beam.io.ReadFromText('BOH_Data_20210501_03/3d_data_source_Transaction_Type_Time__20210716_155124.txt', skip_header_lines =1)
                         # | 'ReadData transtype time' >> beam.io.ReadFromText('BOH_Data_20210501_09/9d_data_source_Transaction_Type_Time_20210721_192925.txt', skip_header_lines =1)
-                        # | 'ReadData transtype time' >> beam.io.ReadFromText('gs://sb-data-source/data_source_20210501/Transaction_Type_Time_20210607_102017.txt', skip_header_lines =1)
+                        | 'ReadData transtype time' >> beam.io.ReadFromText('gs://sb-data-source/data_source_20210501/Transaction_Type_Time_20210607_102017.txt', skip_header_lines =1)
                         # | 'ReadData transtype time' >> beam.io.ReadFromText('gs://sb-data-source/3d_data_source_20210501/3d_data_source_Transaction_Type_Time__20210716_155124.txt', skip_header_lines =1)
                         # | 'ReadData transtype time' >> beam.io.ReadFromText('gs://sb-data-source/9d_data_source_20210501/9d_data_source_Transaction_Type_Time_20210721_192925.txt', skip_header_lines =1)
                         # | 'ReadData transtype time' >> beam.io.ReadFromText('gs://sb-data-source/1m_datasource_20210501/Transaction_Type_Time_20210730_090714.txt', skip_header_lines =1, coder=CustomCoder())
                         # | 'ReadData transtype time' >> beam.io.ReadFromText('gs://sb-data-source/1m_datasource-20210501-01-10days/01-10days-Transaction_Type_Time_202108021.txt', skip_header_lines =1, coder=CustomCoder())
-                        | 'ReadData transtype time' >> beam.io.ReadFromText('gs://sb-data-source/1m_datasource-20210501-11-20days/11-20days-Transaction_Type_Time_202108023.txt', skip_header_lines =1, coder=CustomCoder())
+                        # | 'ReadData transtype time' >> beam.io.ReadFromText('gs://sb-data-source/1m_datasource-20210501-11-20days/11-20days-Transaction_Type_Time_202108023.txt', skip_header_lines =1, coder=CustomCoder())
                         # | 'ReadData transtype time' >> beam.io.ReadFromText('gs://sb-data-source/1m_datasource-20210501-21-31days/21-31days-Transaction_Type_Time_202108022.txt', skip_header_lines =1, coder=CustomCoder())
                         # | 'ReadData transtype time' >> beam.io.ReadFromText('gs://stbck_sales_data/3D_data_source_20210501/3d_data_source_Transaction_Type_Time__20210716_155124.txt', skip_header_lines =1)
                         | 'SplitData transtype time' >> beam.Map(lambda x: x.split('|'))
@@ -1071,12 +1081,12 @@ def run(argv=None):
                         # | 'ReadData partdics ' >> beam.io.ReadFromText('data_source_BOH/data_source_20210501_part_disc_20210607_095311.txt', skip_header_lines =1)
                         # | 'ReadData partdics' >> beam.io.ReadFromText('BOH_Data_20210501_03/3d_data_source_part_disc_20210710_064602.txt', skip_header_lines =1)
                         # | 'ReadData partdics' >> beam.io.ReadFromText('BOH_Data_20210501_09/9d_data_source_part_disc_20210721_185935.txt', skip_header_lines =1)
-                        # | 'ReadData partdisc' >> beam.io.ReadFromText('gs://sb-data-source/data_source_20210501/part_disc_20210607_095311.txt', skip_header_lines =1)
+                        | 'ReadData partdisc' >> beam.io.ReadFromText('gs://sb-data-source/data_source_20210501/part_disc_20210607_095311.txt', skip_header_lines =1)
                         # | 'ReadData partdisc' >> beam.io.ReadFromText('gs://sb-data-source/3d_data_source_20210501/3d_data_source_part_disc_20210710_064602.txt', skip_header_lines =1)
                         # | 'ReadData partdisc' >> beam.io.ReadFromText('gs://sb-data-source/9d_data_source_20210501/9d_data_source_part_disc_20210721_185935.txt', skip_header_lines =1)
                         # | 'ReadData partdisc' >> beam.io.ReadFromText('gs://sb-data-source/1m_datasource_20210501/part_disc_20210728_140151.txt', skip_header_lines =1, coder=CustomCoder())
                         # | 'ReadData partdisc' >> beam.io.ReadFromText('gs://sb-data-source/1m_datasource-20210501-01-10days/01-10days-part_disc_20210801_210649.txt', skip_header_lines =1, coder=CustomCoder())
-                        | 'ReadData partdisc' >> beam.io.ReadFromText('gs://sb-data-source/1m_datasource-20210501-11-20days/11-20days-part_disc_20210801_212643.txt', skip_header_lines =1, coder=CustomCoder())
+                        # | 'ReadData partdisc' >> beam.io.ReadFromText('gs://sb-data-source/1m_datasource-20210501-11-20days/11-20days-part_disc_20210801_212643.txt', skip_header_lines =1, coder=CustomCoder())
                         # | 'ReadData partdisc' >> beam.io.ReadFromText('gs://sb-data-source/1m_datasource-20210501-21-31days/21-31days-part_disc_20210801_214935.txt', skip_header_lines =1, coder=CustomCoder())
                         # | 'ReadData partdics ' >> beam.io.ReadFromText('gs://stbck_sales_data/3D_data_source_20210501/3d_data_source_part_disc_20210710_064602.txt', skip_header_lines =1)
                         | 'SplitData partdisc' >> beam.Map(lambda x: x.split('|'))                    
@@ -1131,12 +1141,12 @@ def run(argv=None):
                         # | 'ReadData transaction' >> beam.io.ReadFromText('data_source_BOH/data_source_20210501_sales_transactions_20210607_094416.txt', skip_header_lines =1)
                         # | 'ReadData transaction' >> beam.io.ReadFromText('BOH_Data_20210501_03/3d_data_source_sales_transactions_20210709_102056.txt', skip_header_lines =1)
                         # | 'ReadData transaction' >> beam.io.ReadFromText('BOH_Data_20210501_09/9d_data_source_sales_transactions_20210721_184841.txt', skip_header_lines =1)
-                        # | 'ReadData transaction' >> beam.io.ReadFromText('gs://sb-data-source/data_source_20210501/sales_transactions_20210607_094416.txt', skip_header_lines =1)
+                        | 'ReadData transaction' >> beam.io.ReadFromText('gs://sb-data-source/data_source_20210501/sales_transactions_20210607_094416.txt', skip_header_lines =1)
                         # | 'ReadData transaction' >> beam.io.ReadFromText('gs://sb-data-source/3d_data_source_20210501/3d_data_source_sales_transactions_20210709_102056.txt', skip_header_lines =1)
                         # | 'ReadData transaction' >> beam.io.ReadFromText('gs://sb-data-source/9d_data_source_20210501/9d_data_source_sales_transactions_20210721_184841.txt', skip_header_lines =1)
                         # | 'ReadData transaction' >> beam.io.ReadFromText('gs://sb-data-source/1m_datasource_20210501/sales_transactions_20210728_132936.txt', skip_header_lines =1, coder=CustomCoder())
                         # | 'ReadData transaction' >> beam.io.ReadFromText('gs://sb-data-source/1m_datasource-20210501-01-10days/01-10days-sales_transactions_20210801_210110.txt', skip_header_lines =1, coder=CustomCoder())
-                        | 'ReadData transaction' >> beam.io.ReadFromText('gs://sb-data-source/1m_datasource-20210501-11-20days/11-20days-sales_transactions_20210801_212107.txt', skip_header_lines =1, coder=CustomCoder())
+                        # | 'ReadData transaction' >> beam.io.ReadFromText('gs://sb-data-source/1m_datasource-20210501-11-20days/11-20days-sales_transactions_20210801_212107.txt', skip_header_lines =1, coder=CustomCoder())
                         # | 'ReadData transaction' >> beam.io.ReadFromText('gs://sb-data-source/1m_datasource-20210501-21-31days/21-31days-sales_transactions_20210801_214416.txt', skip_header_lines =1, coder=CustomCoder())
                         # | 'ReadData transaction' >> beam.io.ReadFromText('gs://stbck_sales_data/3D_data_source_20210501/3d_data_source_sales_transactions_20210709_102056.txt', skip_header_lines =1)
                         | 'SplitData transaction' >> beam.Map(lambda x: x.split('|'))
@@ -1190,12 +1200,12 @@ def run(argv=None):
                         # | 'ReadData transaction details' >> beam.io.ReadFromText('data_source_BOH/data_source_20210501_sales_transaction_details_20210607_094608.txt', skip_header_lines =1)
                         # | 'ReadData transaction details' >> beam.io.ReadFromText('BOH_Data_20210501_03/3d_data_source_sales_transaction_details_20210709_135236.txt', skip_header_lines =1)
                         # | 'ReadData transaction details' >> beam.io.ReadFromText('BOH_Data_20210501_09/9d_data_source_sales_transaction_details_20210721_185124.txt', skip_header_lines =1)
-                        # | 'ReadData transaction details' >> beam.io.ReadFromText('gs://sb-data-source/data_source_20210501/sales_transaction_details_20210607_094608.txt', skip_header_lines =1)
+                        | 'ReadData transaction details' >> beam.io.ReadFromText('gs://sb-data-source/data_source_20210501/sales_transaction_details_20210607_094608.txt', skip_header_lines =1)
                         # | 'ReadData transaction details' >> beam.io.ReadFromText('gs://sb-data-source/3d_data_source_20210501/3d_data_source_sales_transaction_details_20210709_135236.txt', skip_header_lines =1)
                         # | 'ReadData transaction details' >> beam.io.ReadFromText('gs://sb-data-source/9d_data_source_20210501/9d_data_source_sales_transaction_details_20210721_185124.txt', skip_header_lines =1)
                         # | 'ReadData transaction details' >> beam.io.ReadFromText('gs://sb-data-source/1m_datasource_20210501/sales_transaction_details_20210728_133857.txt', skip_header_lines =1, coder=CustomCoder())
                         # | 'ReadData transaction details' >> beam.io.ReadFromText('gs://sb-data-source/1m_datasource-20210501-01-10days/01-10days-sales_transaction_details_20210801_210422.txt', skip_header_lines =1, coder=CustomCoder())
-                        | 'ReadData transaction details' >> beam.io.ReadFromText('gs://sb-data-source/1m_datasource-20210501-11-20days/11-20days-sales_transaction_details_20210801_212400.txt', skip_header_lines =1, coder=CustomCoder())
+                        # | 'ReadData transaction details' >> beam.io.ReadFromText('gs://sb-data-source/1m_datasource-20210501-11-20days/11-20days-sales_transaction_details_20210801_212400.txt', skip_header_lines =1, coder=CustomCoder())
                         # | 'ReadData transaction details' >> beam.io.ReadFromText('gs://sb-data-source/1m_datasource-20210501-21-31days/21-31days-sales_transaction_details_20210801_214652.txt', skip_header_lines =1, coder=CustomCoder())
                         # | 'ReadData transaction details' >> beam.io.ReadFromText('gs://stbck_sales_data/3D_data_source_20210501/3d_data_source_sales_transaction_details_20210709_135236.txt', skip_header_lines =1)
                         | 'SplitData transaction details' >> beam.Map(lambda x: x.split('|'))
@@ -1231,12 +1241,12 @@ def run(argv=None):
                         # | 'ReadData daily table' >> beam.io.ReadFromText('data_source_BOH/data_source_20210501_daily_table_20210607_094807.txt', skip_header_lines =1)
                         # | 'ReadData daily table' >> beam.io.ReadFromText('BOH_Data_20210501_03/3d_data_source_daily_table_20210710_065220.txt', skip_header_lines =1)
                         # | 'ReadData daily table' >> beam.io.ReadFromText('BOH_Data_20210501_09/9d_data_source_daily_table_20210721_190936.txt', skip_header_lines =1)
-                        # | 'ReadData daily table' >> beam.io.ReadFromText('gs://sb-data-source/data_source_20210501/daily_table_20210607_094807.txt', skip_header_lines =1)
+                        | 'ReadData daily table' >> beam.io.ReadFromText('gs://sb-data-source/data_source_20210501/daily_table_20210607_094807.txt', skip_header_lines =1)
                         # | 'ReadData daily table' >> beam.io.ReadFromText('gs://sb-data-source/3d_data_source_20210501/3d_data_source_daily_table_20210710_065220.txt', skip_header_lines =1)
                         # | 'ReadData daily table' >> beam.io.ReadFromText('gs://sb-data-source/9d_data_source_20210501/9d_data_source_daily_table_20210721_190936.txt', skip_header_lines =1)
                         # | 'ReadData daily table' >> beam.io.ReadFromText('gs://sb-data-source/1m_datasource_20210501/daily_table_20210728_140540.txt', skip_header_lines =1, coder=CustomCoder())
                         # | 'ReadData daily table' >> beam.io.ReadFromText('gs://sb-data-source/1m_datasource-20210501-01-10days/01-10days-daily_table_20210801_211053.txt', skip_header_lines =1, coder=CustomCoder())
-                        | 'ReadData daily table' >> beam.io.ReadFromText('gs://sb-data-source/1m_datasource-20210501-11-20days/11-20days-daily_table_20210801_212940.txt', skip_header_lines =1, coder=CustomCoder())
+                        # | 'ReadData daily table' >> beam.io.ReadFromText('gs://sb-data-source/1m_datasource-20210501-11-20days/11-20days-daily_table_20210801_212940.txt', skip_header_lines =1, coder=CustomCoder())
                         # | 'ReadData daily table' >> beam.io.ReadFromText('gs://sb-data-source/1m_datasource-20210501-21-31days/21-31days-daily_table_20210801_215201.txt', skip_header_lines =1, coder=CustomCoder())
                         # | 'ReadData daily table' >> beam.io.ReadFromText('gs://stbck_sales_data/3D_data_source_20210501/3d_data_source_daily_table_20210710_065220.txt', skip_header_lines =1)
                         | 'SplitData daily table' >> beam.Map(lambda x: x.split('|'))
@@ -1265,12 +1275,12 @@ def run(argv=None):
                         # | 'ReadData daily order' >> beam.io.ReadFromText('data_source_BOH/data_source_20210501_daily_order_20210607_094920.txt', skip_header_lines =1)
                         # | 'ReadData daily order' >> beam.io.ReadFromText('BOH_Data_20210501_03/3d_data_source_daily_order_20210710_065323.txt', skip_header_lines =1)
                         # | 'ReadData daily order' >> beam.io.ReadFromText('BOH_Data_20210501_09/9d_data_source_daily_order_20210721_191008.txt', skip_header_lines =1)
-                        # | 'ReadData daily order' >> beam.io.ReadFromText('gs://sb-data-source/data_source_20210501/daily_order_20210607_094920.txt', skip_header_lines =1)
+                        | 'ReadData daily order' >> beam.io.ReadFromText('gs://sb-data-source/data_source_20210501/daily_order_20210607_094920.txt', skip_header_lines =1)
                         # | 'ReadData daily order' >> beam.io.ReadFromText('gs://sb-data-source/3d_data_source_20210501/3d_data_source_daily_order_20210710_065323.txt', skip_header_lines =1)
                         # | 'ReadData daily order' >> beam.io.ReadFromText('gs://sb-data-source/9d_data_source_20210501/9d_data_source_daily_order_20210721_191008.txt', skip_header_lines =1)
                         # | 'ReadData daily order' >> beam.io.ReadFromText('gs://sb-data-source/1m_datasource_20210501/daily_order_20210728_140624.txt', skip_header_lines =1, coder=CustomCoder())
                         # | 'ReadData daily order' >> beam.io.ReadFromText('gs://sb-data-source/1m_datasource-20210501-01-10days/01-10days-daily_order_20210801_211102.txt', skip_header_lines =1, coder=CustomCoder())
-                        | 'ReadData daily order' >> beam.io.ReadFromText('gs://sb-data-source/1m_datasource-20210501-11-20days/11-20days-daily_order_20210801_212949.txt', skip_header_lines =1, coder=CustomCoder())
+                        # | 'ReadData daily order' >> beam.io.ReadFromText('gs://sb-data-source/1m_datasource-20210501-11-20days/11-20days-daily_order_20210801_212949.txt', skip_header_lines =1, coder=CustomCoder())
                         # | 'ReadData daily order' >> beam.io.ReadFromText('gs://sb-data-source/1m_datasource-20210501-21-31days/21-31days-daily_order_20210801_215211.txt', skip_header_lines =1, coder=CustomCoder())
                         # | 'ReadData daily order' >> beam.io.ReadFromText('gs://stbck_sales_data/3D_data_source_20210501/3d_data_source_daily_order_20210710_065323.txt', skip_header_lines =1)
                         | 'SplitData daily order' >> beam.Map(lambda x: x.split('|'))
@@ -1507,11 +1517,21 @@ def run(argv=None):
                                                             # | 'Delete unwanted column for Table Fact' >> beam.Map(del_unwanted_cols_fact)
     )
 
+    # Run Local first
     fact_fact = (left_join_stdbaspdtdomtpd  | 'tolist fact last' >> beam.combiners.ToList()
                                     | 'fact dup last' >> beam.Map(rmduplicate)
                                     | 'todict fact last' >> beam.ParDo(BreakList())
-                                    # | 'Delete unwanted column for Table Fact' >> beam.Map(del_unwanted_cols_fact)
-    )  
+                                    | 'Delete unwanted column for Table Fact' >> beam.Map(del_unwanted_cols_fact)
+                                    # | 'WriteToList to text' >> WriteToText('hasil-fact-last', '.txt')
+    )
+
+    # Run use DataFlow second
+    # processed_list = process_file() # -> pake method untuk open file hasil ToList() dan diubah ke list of dict & remove duplicate
+    # fact_fact = (left_join_stdbaspdtdomtpd  | 'Create from ToList() fact last' >> beam.Create(processed_list)
+    #                                 # | 'fact dup last' >> beam.Map(rmduplicate)
+    #                                 # | 'todict fact last' >> beam.ParDo(BreakList())
+    #                                 | 'Delete unwanted column for Table Fact' >> beam.Map(del_unwanted_cols_fact)
+    # )
     
 #    # ================PAID >< PAYMENT TYPES=======================================================================
 

@@ -66,7 +66,7 @@ schema_tenders_master = (
 
 project_id = 'wired-glider-289003'  # replace with your project ID
 dataset_id = 'starbuck_data_samples'  # replace with your dataset ID
-table_id_tender = 'SB_FIN_DISCDAILYDETAILS'
+table_id_tender = 'SB_DISC_DAILY'
 
     # parameters
     # project_id='wired-glider-289003'

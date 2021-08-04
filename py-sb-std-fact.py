@@ -1042,9 +1042,6 @@ def run(argv=None):
                                                                     join_type='left', join_keys=join_keys)
     )
 
-    print("test")
-    print(left_join_dtdo)
-    print("test2")
     
     rm_left_std_dtdo = (left_join_std_dtdo | 'CHANGE JOINED STD DTDO INTO LIST' >> beam.combiners.ToList() 
                                             | 'REMOVE DUPLICATE IN STD DTDO' >> beam.Map(rmduplicate)

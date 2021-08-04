@@ -7,3 +7,4 @@ result.txt
 txt_source/
 apache_beam*
 __pycache__
+py-*

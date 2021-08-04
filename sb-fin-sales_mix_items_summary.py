@@ -75,7 +75,7 @@ schema_tenders_master = (
 
 project_id = 'wired-glider-289003'  # replace with your project ID
 dataset_id = 'starbuck_data_samples'  # replace with your dataset ID
-table_id_tender = 'SB_FIN_SalesMixItemsSummary'
+table_id_tender = 'SB_SALES_MIX_ITEMS'
 
     # parameters
     # project_id='wired-glider-289003'
@@ -131,15 +131,15 @@ def run(argv=None):
                         )
 
     # Write to BQ
-    SalesMixItemsSummary_data | 'Write to BQ SalesMixItemsSummary' >> beam.io.WriteToBigQuery(
-                    table=table_id_tender,
-                    dataset=dataset_id,
-                    project=project_id,
-                    schema=schema_tenders_master,
-                    write_disposition=beam.io.BigQueryDisposition.WRITE_TRUNCATE,
-                    create_disposition=beam.io.BigQueryDisposition.CREATE_IF_NEEDED,
-                    # batch_size=int(100)
-                    )
+    # SalesMixItemsSummary_data | 'Write to BQ SalesMixItemsSummary' >> beam.io.WriteToBigQuery(
+    #                 table=table_id_tender,
+    #                 dataset=dataset_id,
+    #                 project=project_id,
+    #                 schema=schema_tenders_master,
+    #                 write_disposition=beam.io.BigQueryDisposition.WRITE_TRUNCATE,
+    #                 create_disposition=beam.io.BigQueryDisposition.CREATE_IF_NEEDED,
+    #                 # batch_size=int(100)
+    #                 )
 
     result = p.run()
     result.wait_until_finish()

@@ -33,7 +33,6 @@ def convert_types_IQRYSalesTakeAwayFee(data):
 
     date_format = '%Y-%m-%d'
 
-
     data['discount_total'] = abs(int(data['discount_total'])) if 'discount_total' in data else None
     data['family_group_name'] = str(data['family_group_name']) if 'family_group_name' in data else None
     data['gross_sales_after_disc'] = abs(int(data['gross_sales_after_disc'])) if 'gross_sales_after_disc' in data else None
@@ -76,7 +75,7 @@ schema_tenders_master = (
 
 project_id = 'wired-glider-289003'  # replace with your project ID
 dataset_id = 'starbuck_data_samples'  # replace with your dataset ID
-table_id_tender = 'SB_FIN_IQRYSALESTAKEAWAYFEE'
+table_id_tender = 'SB_IQRY_SALES_TAKEAWAY'
 
     # parameters
     # project_id='wired-glider-289003'
