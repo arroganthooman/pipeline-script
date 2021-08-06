@@ -1,4 +1,7 @@
-import pandas as pd
+'''
+Script to move xlsx file from local to GCS
+'''
+
 import os
 import openpyxl
 from google.cloud import storage
@@ -14,7 +17,7 @@ def upload_to_bucket(file_name, path_to_file, bucket_name):
     blob.upload_from_filename(path_to_file)
 
 def parse_date(date):
-    '''Basic date parser to string yyyy_m_d'''
+    '''Basic date parser from m/d/yyy to yyyy_m_d'''
 
     date = date.split("/")
     month = date[0]
@@ -51,15 +54,15 @@ def generate_filename_and_upload(file_path):
     parsed_filename = filename_dict.get(document_title)
     parsed_date = parse_date(document_date) if parsed_filename != "CompareKPIsByDate" else compare_kpi_date_parser(document_date)
 
-    
-    file_name_to_upload = f'data_source/{parsed_filename}_{parsed_date}.xlsx'
-    bucket_name = "sb-fikri-test-move"
+    # File upload configuration
+    file_name_to_upload = f'data_source/adhoc/{parsed_filename}_{parsed_date}.xlsx'
+    bucket_name = "sb-fikri-test-move" #replace with your bucket name
 
     print(f"Uploading {file_name_to_upload}....")
     upload_to_bucket(file_name_to_upload, file_path, bucket_name)
 
 if __name__ == "__main__":
-    path_name = "/media/arroganthooman/DATA/Fikri/UI/Magang/Script/moving_script/source_file_xlsx"
+    path_name = "/media/arroganthooman/DATA/Fikri/UI/Magang/Script/moving_script/source_file_xlsx" # replace with your folder path
     list_file = os.listdir(path_name)
 
     for file in list_file:
