@@ -1,5 +1,5 @@
 '''
-Script to move xlsx file from local to GCS
+Script to move xlsx file from local folder to GCS
 '''
 
 import os
@@ -32,7 +32,7 @@ def compare_kpi_date_parser(date):
 
     return parse_date(date)
 
-def generate_filename_and_upload(file_path):
+def generate_filename(file_path):
     '''Method to generate filename and date, also upload'''
 
     wb_obj = openpyxl.load_workbook(file_path)
@@ -50,26 +50,42 @@ def generate_filename_and_upload(file_path):
         "Sales Mix Items Summary": "SalesMixItemsSummary",
     }
 
-    # generate filename and date based on the sheet
-    parsed_filename = filename_dict.get(document_title)
-    parsed_date = parse_date(document_date) if parsed_filename != "CompareKPIsByDate" else compare_kpi_date_parser(document_date)
+    # generate filename and date based on the sheet title and date
+    parsed_title = filename_dict.get(document_title)
+    parsed_date = parse_date(document_date) if parsed_title != "CompareKPIsByDate" else compare_kpi_date_parser(document_date)
 
-    # File upload configuration
-    file_name_to_upload = f'data_source/adhoc/{parsed_filename}_{parsed_date}.xlsx'
-    bucket_name = "sb-fikri-test-move" #replace with your bucket name
+    new_file_name = f'{parsed_title}_{parsed_date}.xlsx'
 
-    print(f"Uploading {file_name_to_upload}....")
-    upload_to_bucket(file_name_to_upload, file_path, bucket_name)
+    return new_file_name
+
+
 
 if __name__ == "__main__":
-    path_name = "/media/arroganthooman/DATA/Fikri/UI/Magang/Script/moving_script/source_file_xlsx" # replace with your folder path
-    list_file = os.listdir(path_name)
+    local_path_name = "/media/arroganthooman/DATA/Fikri/UI/Magang/Script/moving_script/source_file_xlsx" # replace with your folder path
+    list_file = os.listdir(local_path_name)
 
-    for file in list_file:
-        file_path = f"{path_name}/{file}"
-        generate_filename_and_upload(file_path)
+    for raw_file_name in list_file:
+        file_path = f"{local_path_name}/{raw_file_name}"
+        correct_file_name = generate_filename(file_path)
 
-    print("Upload finished.")
+        # Upload to GCS
+        bucket_name = "sb-fikri-test-move" # replace with your bucket name
+        bucket_path = 'sb_data_source/adhoc' # replace with your bucket_path
+        gcs_filename = f'{bucket_path}/{correct_file_name}' # Include the directory in front
+
+        print(f"Uploading {correct_file_name}...")
+        upload_to_bucket(gcs_filename, file_path, bucket_name)
+
+        # rename local file to correct one
+        print(f"Renaming '{raw_file_name}' to '{correct_file_name}'...")
+
+        source = f'{local_path_name}/{raw_file_name}'
+        dest = f'{local_path_name}/{correct_file_name}'
+        os.rename(source, dest)
+
+        print("File succesfully uploaded and renamed.\n")
+
+    print("\nAll Upload finished.")
 
 
 
