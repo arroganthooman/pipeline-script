@@ -9,7 +9,7 @@ from google.cloud import storage
 def upload_to_bucket(file_name, path_to_file, bucket_name):
     """ Upload data to a bucket"""
 
-    credential = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
+    credential = os.getenv("GOOGLE_APPLICATION_CREDENTIALS") # you can also replace it with the path to your service account cred
     storage_client = storage.Client.from_service_account_json(credential)
 
     bucket = storage_client.get_bucket(bucket_name) 
@@ -61,9 +61,10 @@ def generate_filename(file_path):
 
 
 if __name__ == "__main__":
-    local_path_name = "/media/arroganthooman/DATA/Fikri/UI/Magang/Script/moving_script/source_file_xlsx" # replace with your folder path
+    local_path_name = "/media/arroganthooman/DATA/Fikri/UI/Magang/Script/moving_script/source_file_txt" # replace with your folder path
     list_file = os.listdir(local_path_name)
 
+    # Iterate all file in the directory
     for raw_file_name in list_file:
         file_path = f"{local_path_name}/{raw_file_name}"
         correct_file_name = generate_filename(file_path)
@@ -75,6 +76,7 @@ if __name__ == "__main__":
 
         print(f"Uploading {correct_file_name}...")
         upload_to_bucket(gcs_filename, file_path, bucket_name)
+        
 
         # rename local file to correct one
         print(f"Renaming '{raw_file_name}' to '{correct_file_name}'...")
