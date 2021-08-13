@@ -1,4 +1,4 @@
-venv
+*venv*
 .env
 wired-glider-289003-9bd74e62ec18.json
 data_source_xlxs/
@@ -7,6 +7,5 @@ result.txt
 txt_source/
 apache_beam*
 __pycache__
-py-*
 source_file_xlsx/
 openpyxl-3.0.7.tar.gz
